@@ -7,7 +7,7 @@ The code here produces a proper _product feed xml_ that validates against the on
 ## Installation
 After you have cloned/extracted the code, you will need to compile it. The shell script in the root of the project (`mvnw`) will download the latest Maven tool automatically; see below for actions:
 ```sh
-$ mvnw clean install
+$ ./mvnw clean install
 ```
 A few seconds later, in the `target` directory, a new _executable_ jar will be produced. It is a standalone (Java is required) executable and can be directly used to produce the feed. You may execute it with `./target/<nameofjar.jar>`. A sample application.properties file is provided below - you need to modify appropriately so the generator can find the database.
 ### Sample application.properties file
