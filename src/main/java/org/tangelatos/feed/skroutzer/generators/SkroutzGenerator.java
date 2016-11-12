@@ -53,7 +53,7 @@ public class SkroutzGenerator implements Generator {
             "order by prd.product_id;";
 
     String categorySql = "SELECT cp.category_id, cd.name, level " +
-            "FROM oc_488category_path cp, oc_488category_description cd, oc_488language lang " +
+            "FROM $OC_BASE$category_path cp, $OC_BASE$category_description cd, $OC_BASE$language lang " +
             "WHERE cp.category_id = ? " +
             "and cp.path_id=cd.category_id " +
             "and cd.language_id=lang.language_id " +
@@ -92,7 +92,9 @@ public class SkroutzGenerator implements Generator {
 
     @Override
     public String prepareCategorySql() {
-        return categorySql.replaceAll(Pattern.quote("$OC_LANGCODE$"), langCode);
+
+        return categorySql.replaceAll(Pattern.quote("$OC_LANGCODE$"), langCode)
+                .replaceAll(Pattern.quote("$OC_BASE$"), tableBase);
     }
 
     @Override
