@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mywebstore>
+    <created_at th:text="${date}">dates</created_at>
+    <products>
+        <product th:each="product  : ${products}">
+            <id th:text="${product.id}">322233</id>
+            <name th:text="${product.name}"><![CDATA[MadBiker 600]]></name>
+            <link th:text="${product.link}"><![CDATA[http://www.mywebstore.co.uk/product/322233]]></link>
+            <image th:text="${product.image}"><![CDATA[http://www.mywebstore.co.uk/product/322233.jpg]]></image>
+            <category th:id="${product.categoryId}" th:text="${product.category}"><![CDATA[Outdor > Extreme Sports]]></category>
+            <price_with_vat th:text="${product.price}">322.33</price_with_vat>
+            <manufacturer th:text="${product.manufacturer}"><![CDATA[SuperGlasses]]></manufacturer>
+            <mpn th:text="${product.mpn}">ZHD332</mpn>
+            <instock th:text="${product.instock}">N</instock>
+            <availability th:text="${product.availability}">Pre Order</availability>
+            <weight th:text="${product.weight}">360</weight>
+        </product>
+    </products>
+</mywebstore>
