@@ -9,4 +9,6 @@ public interface Generator {
     String getTemplateName();
 
     String prepareCategorySql();
+
+    String getExcludedProductIds();
 }

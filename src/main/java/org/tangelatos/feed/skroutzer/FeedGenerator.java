@@ -1,6 +1,8 @@
 package org.tangelatos.feed.skroutzer;
 
 
+import de.ailis.pherialize.MixedArray;
+import de.ailis.pherialize.Pherialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -104,6 +103,7 @@ public class FeedGenerator {
      * creates a product feed XML - using the template provided and the products list - file is never appended.
      * @param products
      * @param templateName
+     * @param excluded
      * @param f
      */
     public void createFeedXml(List<Product> products, String templateName, File f) {
@@ -120,6 +120,24 @@ public class FeedGenerator {
             LOG.info("Writing complete.");
         } catch (IOException e) {
             LOG.error("Exception writing the file: " + e.getMessage(),e);
+        }
+    }
+
+    public Set<String> getExcluded(Generator templateGenerator) {
+
+        String phpExcluded = template.queryForObject(templateGenerator.getExcludedProductIds(), String.class);
+
+        MixedArray list = Pherialize.unserialize(phpExcluded).toArray();
+
+        if (list == null || list.isEmpty()) {
+            return null;
+        } else {
+            Set<String> exc = new HashSet<>();
+            for (int i = 0; i < list.size(); i++) {
+                exc.add(list.getString(i));
+            }
+            LOG.info("Products excluded: {}",exc);
+            return exc;
         }
     }
 }

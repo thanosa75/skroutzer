@@ -18,6 +18,8 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 @EnableAutoConfiguration
@@ -54,8 +56,11 @@ public class SkroutzFeederApplication implements CommandLineRunner {
 		LOG.info("Generating feed using generator {} and target file {}",
 				generator, fileName);
 		Generator templateGenerator = context.getBean(generator, Generator.class);
-		List<Product> products = gen.generateProducts(templateGenerator);
-		gen.createFeedXml(products, templateGenerator.getTemplateName(), f);
+		final List<Product> products = gen.generateProducts(templateGenerator);
+		final Set<String> excluded = gen.getExcluded(templateGenerator);
+
+		gen.createFeedXml(products.stream().filter( p -> !excluded.contains(p.getId())).collect(Collectors.toList()),
+				templateGenerator.getTemplateName(), f);
 
 
 	}

@@ -59,6 +59,8 @@ public class SkroutzGenerator implements Generator {
             "and cd.language_id=lang.language_id " +
             "and lang.code= '$OC_LANGCODE$' ; ";
 
+    String excludedSql = "SELECT value from $OC_BASE$setting where `group` = 'skroutz' and `key` = 'exclude_feed_product' ; ";
+
     @Value("${feed.opencart.table.base}")
     String tableBase; //OC_BASE
 
@@ -95,6 +97,11 @@ public class SkroutzGenerator implements Generator {
 
         return categorySql.replaceAll(Pattern.quote("$OC_LANGCODE$"), langCode)
                 .replaceAll(Pattern.quote("$OC_BASE$"), tableBase);
+    }
+
+    @Override
+    public String getExcludedProductIds() {
+        return excludedSql.replaceAll(Pattern.quote("$OC_BASE$"), tableBase);
     }
 
     @Override

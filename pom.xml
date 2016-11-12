@@ -55,8 +55,20 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
 
+		<dependency>
+			<groupId>de.ailis.pherialize</groupId>
+			<artifactId>pherialize</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+	</dependencies>
+	<repositories>
+		<repository>
+			<id>ailis-releases</id>
+			<name>Ailis Maven Releases</name>
+			<url>http://nexus.ailis.de/content/groups/public/</url>
+		</repository>
+	</repositories>
 	<build>
 		<plugins>
 			<plugin>
