@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.tangelatos.feed.skroutzer.generators.Generator;
+import org.tangelatos.feed.skroutzer.vo.Product;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
@@ -19,17 +21,18 @@ import java.util.List;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-public class SkroutzfeederApplication implements CommandLineRunner {
+public class SkroutzFeederApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SkroutzfeederApplication.class, args);
+		SpringApplication.run(SkroutzFeederApplication.class, args);
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger("FeederApplication");
-	@Autowired
+
+    @Autowired
 	FeedGenerator gen;
 
-	@Value("${feed.filename:product_feed.xml}")
+	@Value("${feed.filename:./product_feed.xml}")
 	String fileName;
 
 
@@ -46,7 +49,10 @@ public class SkroutzfeederApplication implements CommandLineRunner {
 		File f = new File(fileName);
 		if (f.exists() && !f.delete()) {
 			LOG.error("Cannot delete file {} - please check permissions!",f.getAbsolutePath());
+			return;
 		}
+		LOG.info("Generating feed using generator {} and target file {}",
+				generator, fileName);
 		Generator templateGenerator = context.getBean(generator, Generator.class);
 		List<Product> products = gen.generateProducts(templateGenerator);
 		gen.createFeedXml(products, templateGenerator.getTemplateName(), f);

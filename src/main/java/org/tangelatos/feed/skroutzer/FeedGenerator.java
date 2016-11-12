@@ -9,6 +9,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.tangelatos.feed.skroutzer.generators.Generator;
+import org.tangelatos.feed.skroutzer.vo.Product;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -24,7 +26,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by thanos on 11/12/16.
+ * The simplistic Generator component - queries the database and produces the Products that need to be entered in the
+ * XML - it also performs a distinct() on the uid to make sure that no duplicates are present.
  */
 
 @Component
@@ -44,6 +47,11 @@ public class FeedGenerator {
     @Autowired
     TemplateEngine engine;
 
+    /**
+     * calls the relevant SQL to receive Product and Category; tries to cache as much as possible.
+     * @param sqlGenerator the generator selected
+     * @return the list of products
+     */
     public List<Product> generateProducts(Generator sqlGenerator) {
         String SQL = sqlGenerator.prepareSql();
         String categorySQL = sqlGenerator.prepareCategorySql();
@@ -62,14 +70,16 @@ public class FeedGenerator {
 
                 if (categoriesPath.containsKey(p.getCategoryId()) ) {
                     p.setCategory(categoriesPath.get(p.getCategoryId()));
+                    LOG.debug("HIT: Category {}",p.getCategoryId());
                 } else {
                     List<Map<String, Object>> list = template.queryForList(categorySQL, p.getCategoryId());
                     final StringBuffer realCategory = new StringBuffer();
                     list.forEach(m -> {
                         realCategory.append(m.get("name")).append(" > ");
                     });
-                    p.setCategory(realCategory.substring(0, realCategory.length()-3));
+                    p.setCategory(realCategory.substring(0, realCategory.length()-3).trim());
                     categoriesPath.put(p.getCategoryId(), p.getCategory());
+                    LOG.debug("MISS: Category {} from DB",p.getCategoryId());
                 }
                 p.setImage(resultSet.getString("image"));
                 p.setInstock(resultSet.getString("instock"));
@@ -77,7 +87,8 @@ public class FeedGenerator {
                 p.setManufacturer(resultSet.getString("manufacturer"));
                 p.setMpn(resultSet.getString("mpn"));
                 p.setPrice(resultSet.getString("price_with_vat"));
-                p.setWeight(resultSet.getString("weight"));
+                Double weightInGrams = resultSet.getDouble("weight") * 1000;
+                p.setWeight( weightInGrams.intValue()+"" );
                 p.setAvailability(resultSet.getString("availability"));
 
                 LOG.trace("Mapped product (name={}, id={})",p.getName(),p.getId());
@@ -85,10 +96,16 @@ public class FeedGenerator {
             }
         });
         List<Product> distinct = products.stream().distinct().collect(Collectors.toList());
-        LOG.info("Mapped {} products, cached categories: {}",distinct.size(), categoriesPath.size());
+        LOG.info("Mapped {} unique products, cached categories: {}",distinct.size(), categoriesPath.size());
         return distinct;
     }
 
+    /**
+     * creates a product feed XML - using the template provided and the products list - file is never appended.
+     * @param products
+     * @param templateName
+     * @param f
+     */
     public void createFeedXml(List<Product> products, String templateName, File f) {
 
         Context ctx = new Context(new Locale(locale));
@@ -96,9 +113,10 @@ public class FeedGenerator {
         ctx.setVariable("products", products);
         ctx.setVariable("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
-        try ( Writer writer = new BufferedWriter(new FileWriter(f,false)) ) {
+        try ( Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f,false), "UTF-8")) ) {
             LOG.info("Writing XML in {} using template {} and {} products",f.getAbsolutePath(), templateName, products.size());
-            engine.process(templateName, ctx,writer);
+            String textContent = engine.process(templateName, ctx);
+            writer.write(textContent.replace("\"1.0\"?>", "\"1.0\" encoding=\"UTF-8\"?>" ));
             LOG.info("Writing complete.");
         } catch (IOException e) {
             LOG.error("Exception writing the file: " + e.getMessage(),e);

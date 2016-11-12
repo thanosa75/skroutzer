@@ -3,7 +3,7 @@
     <created_at th:text="${date}">dates</created_at>
     <products>
         <product th:each="product  : ${products}">
-            <id th:text="${product.id}">322233</id>
+            <uid th:text="${product.id}">322233</uid>
             <name th:text="${product.name}"><![CDATA[MadBiker 600]]></name>
             <link th:text="${product.link}"><![CDATA[http://www.mywebstore.co.uk/product/322233]]></link>
             <image th:text="${product.image}"><![CDATA[http://www.mywebstore.co.uk/product/322233.jpg]]></image>

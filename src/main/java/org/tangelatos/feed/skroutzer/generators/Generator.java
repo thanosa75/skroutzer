@@ -1,4 +1,4 @@
-package org.tangelatos.feed.skroutzer;
+package org.tangelatos.feed.skroutzer.generators;
 
 /**
  * Created by thanos on 11/12/16.

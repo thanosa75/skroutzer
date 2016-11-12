@@ -1,7 +1,7 @@
-package org.tangelatos.feed.skroutzer;
+package org.tangelatos.feed.skroutzer.vo;
 
 /**
- * Created by thanos on 11/12/16.
+ * the Product class
  */
 public class Product {
 

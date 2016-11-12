@@ -1,4 +1,4 @@
-package org.tangelatos.feed.skroutzer;
+package org.tangelatos.feed.skroutzer.generators;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -90,6 +90,7 @@ public class SkroutzGenerator implements Generator {
         return prepared;
     }
 
+    @Override
     public String prepareCategorySql() {
         return categorySql.replaceAll(Pattern.quote("$OC_LANGCODE$"), langCode);
     }
