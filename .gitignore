@@ -25,3 +25,4 @@ nbdist/
 .nb-gradle/
 
 product_feed.xml
+application.properties
