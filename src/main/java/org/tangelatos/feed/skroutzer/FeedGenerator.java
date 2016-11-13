@@ -134,21 +134,18 @@ public class FeedGenerator {
     }
 
     public Set<String> getExcluded(Generator templateGenerator) {
-
+        Set<String> exc = new HashSet<>();
+        
         String phpExcluded = template.queryForObject(templateGenerator.getExcludedProductIds(), String.class);
-
         MixedArray list = Pherialize.unserialize(phpExcluded).toArray();
 
-        if (list == null || list.isEmpty()) {
-            return null;
-        } else {
-            Set<String> exc = new HashSet<>();
+        if (list != null && !list.isEmpty()) {
             for (int i = 0; i < list.size(); i++) {
                 exc.add(list.getString(i));
             }
             LOG.info("Products excluded: {}",exc);
-            return exc;
         }
+        return exc;
     }
 
     public Map<String,Double> getDiscounts(Generator templateGenerator) {
