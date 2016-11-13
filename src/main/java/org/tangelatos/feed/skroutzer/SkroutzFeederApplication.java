@@ -18,6 +18,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -56,8 +57,10 @@ public class SkroutzFeederApplication implements CommandLineRunner {
 		LOG.info("Generating feed using generator {} and target file {}",
 				generator, fileName);
 		Generator templateGenerator = context.getBean(generator, Generator.class);
-		final List<Product> products = gen.generateProducts(templateGenerator);
-		final Set<String> excluded = gen.getExcluded(templateGenerator);
+
+		final Map<String,Double> discounts = gen.getDiscounts(templateGenerator);
+		final List<Product> products = gen.generateProducts(templateGenerator, discounts);
+		final Set<String> excluded = gen.getExcluded(templateGenerator);;
 
 		gen.createFeedXml(products.stream().filter( p -> !excluded.contains(p.getId())).collect(Collectors.toList()),
 				templateGenerator.getTemplateName(), f);

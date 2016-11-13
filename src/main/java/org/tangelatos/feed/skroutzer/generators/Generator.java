@@ -11,4 +11,6 @@ public interface Generator {
     String prepareCategorySql();
 
     String getExcludedProductIds();
+
+    String getDiscounts();
 }

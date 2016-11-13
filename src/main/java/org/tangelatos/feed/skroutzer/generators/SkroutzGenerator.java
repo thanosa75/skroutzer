@@ -45,6 +45,7 @@ public class SkroutzGenerator implements Generator {
             "  and prd.tax_class_id=tc.tax_class_id " +
             "  and tru.priority=1 " +
             "  and cat.category_id=ptc.category_id " +
+            "  and cat.language_id = lang.language_id " +
             "  and ptc.product_id=prd.product_id " +
             "  and lang.code = '$OC_LANGCODE$' " +
             "  and manf.manufacturer_id=prd.manufacturer_id " +
@@ -58,6 +59,27 @@ public class SkroutzGenerator implements Generator {
             "and cp.path_id=cd.category_id " +
             "and cd.language_id=lang.language_id " +
             "and lang.code= '$OC_LANGCODE$' ; ";
+
+    String discountSql = "select prd.product_id, " +
+            //"       d.price, " +
+            "       round(d.price*((100+tra.rate)/100),2) as price_with_vat, " +
+            "       d.date_start, " +
+            "       d.date_end " +
+            "from $OC_BASE$product_special d, " +
+            "  $OC_BASE$tax_class tc, " +
+            "  $OC_BASE$tax_rate tra, " +
+            "  $OC_BASE$tax_rule tru, " +
+            "  $OC_BASE$product prd " +
+            "where  tc.tax_class_id=tru.tax_class_id " +
+            "  and tru.tax_rate_id=tra.tax_rate_id " +
+            "  and prd.tax_class_id=tc.tax_class_id " +
+            "  and tru.priority=1 " +
+            "  and d.product_id = prd.product_id " +
+            "  and (( current_timestamp between d.date_start and d.date_end) or " +
+            "       ( current_timestamp > d.date_start and d.date_end is null) ) " +
+            "order by 1 ";
+
+
 
     String excludedSql = "SELECT value from $OC_BASE$setting where `group` = 'skroutz' and `key` = 'exclude_feed_product' ; ";
 
@@ -105,8 +127,16 @@ public class SkroutzGenerator implements Generator {
     }
 
     @Override
+    public String getDiscounts() {
+        return discountSql.replaceAll(Pattern.quote("$OC_BASE$"), tableBase);
+    }
+
+
+    @Override
     public String getTemplateName() {
         return "skroutzfeed";
     }
+
+
 
 }

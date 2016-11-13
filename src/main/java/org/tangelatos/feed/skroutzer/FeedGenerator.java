@@ -49,9 +49,10 @@ public class FeedGenerator {
     /**
      * calls the relevant SQL to receive Product and Category; tries to cache as much as possible.
      * @param sqlGenerator the generator selected
+     * @param discounts
      * @return the list of products
      */
-    public List<Product> generateProducts(Generator sqlGenerator) {
+    public List<Product> generateProducts(Generator sqlGenerator, Map<String, Double> discounts) {
         String SQL = sqlGenerator.prepareSql();
         String categorySQL = sqlGenerator.prepareCategorySql();
 
@@ -86,6 +87,14 @@ public class FeedGenerator {
                 p.setManufacturer(resultSet.getString("manufacturer"));
                 p.setMpn(resultSet.getString("mpn"));
                 p.setPrice(resultSet.getString("price_with_vat"));
+
+                if (discounts.containsKey(p.getId())) {
+                    String orig = p.getPrice();
+                    p.setPrice(discounts.get(p.getId()).toString());
+                    LOG.info("Id: {} '{}' has discounted price {} (orig: {})",
+                            p.getId(), p.getName(), p.getPrice(), orig);
+                }
+
                 Double weightInGrams = resultSet.getDouble("weight") * 1000;
                 p.setWeight( weightInGrams.intValue()+"" );
                 p.setAvailability(resultSet.getString("availability"));
@@ -94,6 +103,8 @@ public class FeedGenerator {
                 return p;
             }
         });
+        //product_to_category table has multiple rows
+        //we do a stream distinct here to pick one of the categories that we've returned.
         List<Product> distinct = products.stream().distinct().collect(Collectors.toList());
         LOG.info("Mapped {} unique products, cached categories: {}",distinct.size(), categoriesPath.size());
         return distinct;
@@ -103,7 +114,6 @@ public class FeedGenerator {
      * creates a product feed XML - using the template provided and the products list - file is never appended.
      * @param products
      * @param templateName
-     * @param excluded
      * @param f
      */
     public void createFeedXml(List<Product> products, String templateName, File f) {
@@ -139,5 +149,25 @@ public class FeedGenerator {
             LOG.info("Products excluded: {}",exc);
             return exc;
         }
+    }
+
+    public Map<String,Double> getDiscounts(Generator templateGenerator) {
+
+        String SQL = templateGenerator.getDiscounts();
+        final Map<String,Double> discounts = new HashMap<>();
+        template.query(SQL, new RowMapper<Void>() {
+
+            @Override
+            public Void mapRow(ResultSet resultSet, int i) throws SQLException {
+                discounts.put(
+                    resultSet.getString("product_id"),
+                    resultSet.getDouble("price_with_vat"));
+
+                return null;
+            }
+        });
+
+        return discounts;
+
     }
 }
