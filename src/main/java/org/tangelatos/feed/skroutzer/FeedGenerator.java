@@ -82,6 +82,11 @@ public class FeedGenerator {
                     LOG.debug("MISS: Category {} from DB",p.getCategoryId());
                 }
                 p.setImage(resultSet.getString("image"));
+                if (!p.getImage().contains("-300x300.")) {
+                    String fname = p.getImage().substring(0, p.getImage().lastIndexOf("."));
+                    String ext = p.getImage().substring(p.getImage().lastIndexOf(".")+1);
+                    p.setImage(fname+"-300x300."+ext);
+                }
                 p.setInstock(resultSet.getString("instock"));
                 p.setLink(resultSet.getString("link"));
                 p.setManufacturer(resultSet.getString("manufacturer"));
