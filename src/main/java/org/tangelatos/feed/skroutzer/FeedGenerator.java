@@ -56,6 +56,7 @@ public class FeedGenerator {
         String SQL = sqlGenerator.prepareSql();
         String categorySQL = sqlGenerator.prepareCategorySql();
 
+
         Map<String,String> categoriesPath = new HashMap<>();
 
         List<Product> products = template.query(SQL, new RowMapper<Product>() {
@@ -81,7 +82,8 @@ public class FeedGenerator {
                     categoriesPath.put(p.getCategoryId(), p.getCategory());
                     LOG.debug("MISS: Category {} from DB",p.getCategoryId());
                 }
-                p.setImage(resultSet.getString("image"));
+                p.setImage( sqlGenerator.fixImageUrl(resultSet.getString("image")));
+
                 p.setInstock(resultSet.getString("instock"));
                 p.setLink(resultSet.getString("link"));
                 p.setManufacturer(resultSet.getString("manufacturer"));

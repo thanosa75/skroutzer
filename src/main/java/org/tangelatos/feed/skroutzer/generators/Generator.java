@@ -13,4 +13,6 @@ public interface Generator {
     String getExcludedProductIds();
 
     String getDiscounts();
+
+    String fixImageUrl(String imageUrl);
 }

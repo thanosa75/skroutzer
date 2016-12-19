@@ -1,6 +1,8 @@
 package org.tangelatos.feed.skroutzer.generators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Pattern;
@@ -10,10 +12,14 @@ import java.util.regex.Pattern;
  */
 @Component("Skroutz")
 public class SkroutzGenerator implements Generator {
-    
+
+    @Autowired
+    JdbcTemplate template;
+
+
     private String productSql = "select prd.product_id, " +
             "  prdd.name, " +
-            "  concat('$OC_SITE$image/',prd.image) as image,  " + //needs host
+            "  prd.image as image,  " +
             "  concat('$OC_SITE$',alias.keyword) as link,  " + //-- needs host
             "  cat.category_id as cat_id, " +
             "  cat.name category, " +
@@ -129,6 +135,33 @@ public class SkroutzGenerator implements Generator {
     @Override
     public String getDiscounts() {
         return discountSql.replaceAll(Pattern.quote("$OC_BASE$"), tableBase);
+    }
+
+
+    String preferredSize = null;
+
+    @Override
+    public String fixImageUrl(String imageUrl) {
+
+        String imgSQL = "select concat(  " +
+                "    (select value from $OC_BASE$setting where `key`='config_image_thumb_width'),  " +
+                "    concat('x', " +
+                "           (select value from $OC_BASE$setting where `key`='config_image_thumb_height') ) )  " +
+                "from dual; ";
+
+
+
+
+        if (preferredSize == null) {
+            preferredSize = template.queryForObject( imgSQL.replaceAll(Pattern.quote("$OC_BASE$"), tableBase), String.class);
+
+        }
+
+        String[] fname = new String[] {
+                imageUrl.substring(0,imageUrl.lastIndexOf(".") ),
+                imageUrl.substring(imageUrl.lastIndexOf(".")+1)
+        };
+        return  sitePrefix + "image/cache/" + fname[0] + "-" + preferredSize + "." + fname[1];
     }
 
 
