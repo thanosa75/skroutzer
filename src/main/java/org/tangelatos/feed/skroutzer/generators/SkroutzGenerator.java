@@ -13,7 +13,7 @@ public class SkroutzGenerator implements Generator {
     
     private String productSql = "select prd.product_id, " +
             "  prdd.name, " +
-            "  concat('$OC_SITE$image/cache/',prd.image) as image,  " + //needs host
+            "  concat('$OC_SITE$image/',prd.image) as image,  " + //needs host
             "  concat('$OC_SITE$',alias.keyword) as link,  " + //-- needs host
             "  cat.category_id as cat_id, " +
             "  cat.name category, " +
